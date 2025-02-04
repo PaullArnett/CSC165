@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
-import org.joml.*;
+import org.joml.*; //only thing vscode doesnt like
 
 public class MyGame extends VariableFrameRateGame
 {
