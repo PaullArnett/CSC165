@@ -1,6 +1,7 @@
 package a1;
 
 import tage.*;
+
 import org.joml.*;
 import static java.lang.Math.min;
 
@@ -24,15 +25,9 @@ public class SatelliteObject extends GameObject
 
         // only concerned with the closest satellite to player
         if (!IsDetonated && !IsDisarmed && avDistance == closestDistance){
-            //disarm the satellite
-            if (camDistance < 3.0f && camDistance > 1.5f && !IsDetonated && !game.rideMode){
-                this.setTextureImage(disarmed);
-                IsDisarmed = true;
-                game.score = game.score + 100;                
-                game.gameMessage = "Satellite Disarmed!";
-            }
+
             //too close, detonate satellite
-            else if (avDistance < 2.0f){
+            if (avDistance < 2.0f){
                 this.setTextureImage(game.detonation);
                 IsDetonated = true;
                 game.gameOver();
@@ -41,7 +36,7 @@ public class SatelliteObject extends GameObject
             else if (avDistance < 6.0f && avDistance >= 2.0f) { 
                 
                 this.setTextureImage(disarmable);
-                game.gameMessage = "Close Enough, Dismount and Disarm!";
+                game.gameMessage = "Close Enough, Disarm the satellite!";
             }	
             //else remain idle
             else{
@@ -51,9 +46,32 @@ public class SatelliteObject extends GameObject
         }
         //game message if far away from all satellites
         if (closestDistance > 22.0f){
-            game.gameMessage = "Go through the Wormhole and Disarm the Satellites!";
+            game.gameMessage = "Go through the Wormhole!";
         }
     }  
+
+    public void disarm(MyGame game, TextureImage disarmed){
+            //disarm the satellite
+            if (avDistance < 6.0f && avDistance > 2.0f && !IsDetonated && !IsDisarmed && avDistance == closestDistance){
+                this.setTextureImage(disarmed);
+                IsDisarmed = true;
+                game.score = game.score + 100;                
+                game.gameMessage = "Satellite Disarmed!";
+                if(game.coreCount == 0){game.satCore1.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
+                if(game.coreCount == 1){game.satCore2.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
+                if(game.coreCount == 2){game.satCore3.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
+                game.coreCount++;
+
+                if(this.equals(game.satellite1)){
+                    game.shakeController.disable();
+                }
+            }
+            else if(avDistance == closestDistance){
+                game.score = game.score - 50; 
+                game.gameMessage = "Not Close Enough! -50 Points";
+                System.out.println(avDistance);
+            }
+    }
     //used to restart the game
     public void resetTexture(TextureImage idle){
         this.setTextureImage(idle);
