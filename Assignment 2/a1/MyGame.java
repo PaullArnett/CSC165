@@ -24,11 +24,11 @@ public class MyGame extends VariableFrameRateGame
 	private InputManager im;
 	public Camera cam, cam2;
 	private Viewport leftVp, rightVp;
-	public CameraOrbit3D cameraOrbit3D;
+	public MyCameraOrbit3D cameraOrbit3D;
 	public GamepadController gamepadController;
 	public KeyboardController keyboardController;
 	public MinimapController minimapController;
-	private RotationController rotationController;
+	public RotationController rotationController;
 	public ShakeController shakeController;
 
 	public boolean cameraMode, gameOver;
@@ -42,7 +42,7 @@ public class MyGame extends VariableFrameRateGame
 	public GameObject x, y, z, manualTunnel, groundPlane, satCore1, satCore2, satCore3;
 	public SatelliteObject satellite1, satellite2, satellite3;
 	private ObjShape dolS, linxS, linyS, linzS, sphS, cubS, torS, tunS, groundPlaneS;
-	public TextureImage doltx, metalIdle, metalDisarmable, metalDisarmed, metalIdle2, metalDisarmable2, metalDisarmed2, metalIdle3, metalDisarmable3, metalDisarmed3, detonation, tuntx;
+	public TextureImage doltx, metalIdle, metalDisarmable, metalDisarmed, metalIdle2, metalDisarmable2, metalDisarmed2, metalIdle3, metalDisarmable3, metalDisarmed3, detonation, tuntx, ground;
 	private Light light1, light2, light3;
 
 	public MyGame() { super(); }
@@ -103,6 +103,7 @@ public class MyGame extends VariableFrameRateGame
 	{	doltx = new TextureImage("Dolphin_HighPolyUV.png");
 		tuntx = new TextureImage("tunnel.jpg");
 		detonation = new TextureImage("detonation.jpg");
+		ground = new TextureImage("ground.jpg");
 
 		metalIdle = new TextureImage("metal_idle.jpg");
 		metalDisarmable = new TextureImage("metal_disarmable.jpg");
@@ -120,14 +121,18 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void buildObjects()
 	{	
-		groundPlane = new GameObject(GameObject.root(), groundPlaneS, metalIdle);
-		groundPlane.setLocalScale((new Matrix4f()).scaling(100.0f));
-		groundPlane.setLocalTranslation((new Matrix4f()).translation(0,-.5f,0));
+		groundPlane = new GameObject(GameObject.root(), groundPlaneS, ground);
+		groundPlane.setLocalScale((new Matrix4f()).scaling(1000.0f));
+		groundPlane.setLocalTranslation((new Matrix4f()).translation(0,0,0));
+
+		// Enable texture tiling
+		groundPlane.getRenderStates().setTiling(1); 
+		groundPlane.getRenderStates().setTileFactor(100);
 
 		Matrix4f initialTranslation, initialScale;
 		// build dolphin in the center of the window
 		avatar = new Player(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0,.5f,0);
+		initialTranslation = (new Matrix4f()).translation(0,1.0f,0);
 		initialScale = (new Matrix4f()).scaling(3.0f);
 		avatar.setLocalTranslation(initialTranslation);
 		avatar.setLocalScale(initialScale);
@@ -136,27 +141,27 @@ public class MyGame extends VariableFrameRateGame
 		
 		//build all 3 satellites
 		satellite1 = new SatelliteObject(GameObject.root(), sphS, metalIdle);
-		initialTranslation = (new Matrix4f()).translation(24,.75f,-60);
-		initialScale = (new Matrix4f()).scaling(1.5f);
+		initialTranslation = (new Matrix4f()).translation(24,2.75f,-60);
+		initialScale = (new Matrix4f()).scaling(3f);
 		satellite1.setLocalTranslation(initialTranslation);
 		satellite1.setLocalScale(initialScale);
 
 		satellite2 = new SatelliteObject(GameObject.root(), torS, metalIdle2);
-		initialTranslation = (new Matrix4f()).translation(40,.75f,-20);
-		initialScale = (new Matrix4f()).scaling(1.8f);
+		initialTranslation = (new Matrix4f()).translation(40,2.25f,-20);
+		initialScale = (new Matrix4f()).scaling(3.8f);
 		satellite2.setLocalTranslation(initialTranslation);
 		satellite2.setLocalScale(initialScale);
 		satellite2.setLocalRotation((new Matrix4f()).rotateZ((float)java.lang.Math.toRadians(-45.0f)).rotateX((float)java.lang.Math.toRadians(-45.0f)));
 
 		satellite3 = new SatelliteObject(GameObject.root(), cubS, metalIdle3);
-		initialTranslation = (new Matrix4f()).translation(53,.75f,-48);
-		initialScale = (new Matrix4f()).scaling(1.0f);
+		initialTranslation = (new Matrix4f()).translation(53,2.25f,-48);
+		initialScale = (new Matrix4f()).scaling(3.3f);
 		satellite3.setLocalTranslation(initialTranslation);
 		satellite3.setLocalScale(initialScale);
 		
 		// build manual tunnel
 		manualTunnel = new GameObject(GameObject.root(), tunS, tuntx);
-		initialTranslation = (new Matrix4f()).translation(8,.5f,-8);
+		initialTranslation = (new Matrix4f()).translation(8,1.0f,-8);
 		manualTunnel.setLocalTranslation(initialTranslation);
 		manualTunnel.setLocalRotation((new Matrix4f()).rotateY((float)java.lang.Math.toRadians(-45.0f)).rotateX((float)java.lang.Math.toRadians(90.0f)));
 		manualTunnel.setLocalScale(new Matrix4f().scaling(.1f, .5f, .1f));
@@ -213,7 +218,7 @@ public class MyGame extends VariableFrameRateGame
 		//red light
 		light1 = new Light();
 		Vector3f satellite1Loc = new Vector3f(satellite1.getWorldLocation());
-		light1.setLocation(satellite1Loc.add((up).mul(10.0f)));
+		light1.setLocation(satellite1Loc.add((up).mul(15.0f)));
 		light1.setDiffuse(1.0f, 0.0f, 0.0f); 
 		light1.setSpecular(0.2f, 0.0f, 0.0f);
 		light1.setType(LightType.SPOTLIGHT);
@@ -253,7 +258,7 @@ public class MyGame extends VariableFrameRateGame
 		startTime = System.currentTimeMillis();
 
   		im = engine.getInputManager();
-		cameraOrbit3D = new CameraOrbit3D(cam, avatar,  engine);
+		cameraOrbit3D = new MyCameraOrbit3D(cam, avatar,  engine);
 		minimapController = new MinimapController(cam2, engine);
 		gamepadController = new GamepadController(this);
 		keyboardController = new KeyboardController(this);
@@ -264,13 +269,7 @@ public class MyGame extends VariableFrameRateGame
 		(engine.getSceneGraph()).addNodeController(shakeController);
 
 		//constantly rotates satellites
-		rotationController.addTarget(manualTunnel);
-		rotationController.addTarget(satellite1);
-		rotationController.addTarget(satellite2);
-		rotationController.addTarget(satellite3);
 		rotationController.enable();
-
-		shakeController.addTarget(satellite1);
 		shakeController.enable();
 
 	}
@@ -332,7 +331,7 @@ public class MyGame extends VariableFrameRateGame
 	public void restartGame() {
 
 		// Reset player position
-		Matrix4f initialTranslation = (new Matrix4f()).translation(0, 0, 0);
+		Matrix4f initialTranslation = (new Matrix4f()).translation(0, 1, 0);
 		avatar.setLocalTranslation(initialTranslation);
 		avatar.setLocalRotation((new Matrix4f()).rotationY((float) Math.toRadians(135.0f)));
 		
@@ -353,6 +352,10 @@ public class MyGame extends VariableFrameRateGame
 		startTime = System.currentTimeMillis();
 		lastFrameTime = 0;
 		currFrameTime = 0;
+
+		satCore1.setLocalScale(new Matrix4f().scaling(0,0,0));
+		satCore2.setLocalScale(new Matrix4f().scaling(0,0,0));
+		satCore3.setLocalScale(new Matrix4f().scaling(0,0,0));
 	
 		System.out.println("Game restarted!");
 	}

@@ -157,7 +157,7 @@ public class GameObject
 
 	// ---------------------------------------------------
 
-	/** Yaw: rotates object on Y axis */
+	/** Yaw: rotates object on local Y axis */
 	public void yaw(float scalar, MyGame game){
         oldRotation = new Matrix4f(this.getLocalRotation()); 
         upAxis = new Vector3f(0f, 1f, 0f); 
@@ -166,6 +166,15 @@ public class GameObject
         newRotation = rotAroundAvatarUp.mul(oldRotation); 
         this.setLocalRotation(newRotation); 
 	}
+
+	/** Global Yaw: rotates object on world Y axis */
+	public void globalYaw(float scalar, MyGame game){
+        oldRotation = new Matrix4f(this.getLocalRotation()); 
+        upAxis = new Vector3f(0f, 1f, 0f); 
+        rotAroundAvatarUp = new Matrix4f().rotation(scalar, upAxis);
+        newRotation = rotAroundAvatarUp.mul(oldRotation); 
+        this.setLocalRotation(newRotation); 
+	}	
 
 	/** Pitch: rotates object on X axis */
 	public void pitch(float scalar, MyGame game) {

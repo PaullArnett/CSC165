@@ -60,11 +60,11 @@ public class KeyboardController
                 }
                 else if (key == 'a' || key =='A'){
                     scalar = 0.02f * game.timeScale;
-                    if(!game.cameraMode) { av.yaw(scalar, game); }
+                    if(!game.cameraMode) { av.globalYaw(scalar, game); }
                 }
                 else if (e.getComponent().getIdentifier() == Component.Identifier.Key.D){    //key 'D' and DOWN both produce char D
                     scalar = -0.02f * game.timeScale;
-                    if(!game.cameraMode){av.yaw(scalar, game);}
+                    if(!game.cameraMode){av.globalYaw(scalar, game);}
                 }
                 
                 //disarm key

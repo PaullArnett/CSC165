@@ -14,8 +14,8 @@ import net.java.games.input.Event;
 import net.java.games.input.Component;
 
 
-public class CameraOrbit3D
-{ 
+public class MyCameraOrbit3D extends CameraOrbit3D
+{
     private Engine engine;
     private Camera camera; // the camera being controlled
     private GameObject avatar; // the target avatar the camera looks at
@@ -23,18 +23,18 @@ public class CameraOrbit3D
     private float cameraElevation; // elevation of camera above target
     private float cameraRadius; // distance between camera and target
     
-    public CameraOrbit3D(Camera cam, GameObject av, Engine e)
+    public MyCameraOrbit3D(Camera cam, GameObject av, Engine e)
     { 
+        // Call the superclass constructor with default azimuth, elevation, and radius values
+        super(cam, av, e, -45.0f, 30.0f, 15.0f);
         engine = e;
-        camera = cam;
-        avatar = av;
-        cameraAzimuth = 0.0f; // start BEHIND and ABOVE the target
-        cameraElevation = 30.0f; // elevation is in degrees
-        cameraRadius = 10.0f; // distance from camera to avatar
+        cameraAzimuth = -45.0f;
+        cameraElevation = 30.0f; 
+        cameraRadius = 15.0f; 
         setupInputs();
-        updateCameraPosition();
     }
 
+    @Override
     public void setupInputs()
     { 
         OrbitAzimuthAction azmAction = new OrbitAzimuthAction();
@@ -58,37 +58,12 @@ public class CameraOrbit3D
         im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RY, zoomAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
     }
-
-    // Compute the camera’s azimuth, elevation, and distance, relative to
-    // the target in spherical coordinates, then convert to world Cartesian
-    // coordinates and set the camera position from that.
-    public void updateCameraPosition()
-    { 
-        Vector3f avatarRot = avatar.getWorldForwardVector();
-        double avatarAngle = Math.toDegrees((double)
-        avatarRot.angleSigned(new Vector3f(0,0,-1), new Vector3f(0,1,0)));
-        float totalAz = cameraAzimuth - (float)avatarAngle;
-        double theta = Math.toRadians(totalAz);
-        double phi = Math.toRadians(cameraElevation);
-        float x = cameraRadius * (float)(Math.cos(phi) * Math.sin(theta));
-        float y = cameraRadius * (float)(Math.sin(phi));
-        float z = cameraRadius * (float)(Math.cos(phi) * Math.cos(theta));
-        camera.setLocation(new Vector3f(x,y,z).add(avatar.getWorldLocation()));
-        camera.lookAt(avatar);
-    }
-
-    public void resetPosition(){
-        
-        cameraAzimuth = 0.0f; // start BEHIND and ABOVE the target
-        cameraElevation = 30.0f; // elevation is in degrees
-        cameraRadius = 10.0f; // distance from camera to avatar
-        updateCameraPosition();
-
-    }
     
     private class OrbitAzimuthAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
+            System.out.println("OrbitAzimuthAction triggered!");  // Debugging print
+
             float rotAmount;
             String btnName = event.getComponent().getIdentifier().getName();
 
@@ -105,9 +80,12 @@ public class CameraOrbit3D
 
             cameraAzimuth += rotAmount;
             cameraAzimuth = cameraAzimuth % 360;
-            updateCameraPosition();
+            System.out.println(cameraAzimuth);  // Debugging print
+
+            updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }
+
     private class ZoomRadiusAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
@@ -126,7 +104,7 @@ public class CameraOrbit3D
                 { zoomAmount=0.0f; }
 
             cameraRadius += zoomAmount;
-            updateCameraPosition();
+            updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }
 
@@ -150,7 +128,7 @@ public class CameraOrbit3D
             cameraElevation += elvAmount;
             cameraElevation = cameraElevation % 360;
             cameraElevation = Math.max(1.0f, Math.min(89.0f, cameraElevation));
-            updateCameraPosition();
+            updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }
 

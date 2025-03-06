@@ -27,13 +27,13 @@ public class SatelliteObject extends GameObject
         if (!IsDetonated && !IsDisarmed && avDistance == closestDistance){
 
             //too close, detonate satellite
-            if (avDistance < 2.0f){
+            if (avDistance < 5.0f){
                 this.setTextureImage(game.detonation);
                 IsDetonated = true;
                 game.gameOver();
             }
             //Close enough to disarm
-            else if (avDistance < 6.0f && avDistance >= 2.0f) { 
+            else if (avDistance < 9.0f && avDistance >= 5.0f) { 
                 
                 this.setTextureImage(disarmable);
                 game.gameMessage = "Close Enough, Disarm the satellite!";
@@ -52,7 +52,7 @@ public class SatelliteObject extends GameObject
 
     public void disarm(MyGame game, TextureImage disarmed){
             //disarm the satellite
-            if (avDistance < 6.0f && avDistance > 2.0f && !IsDetonated && !IsDisarmed && avDistance == closestDistance){
+            if (avDistance < 9.0f && avDistance > 5.0f && !IsDetonated && !IsDisarmed && avDistance == closestDistance){
                 this.setTextureImage(disarmed);
                 IsDisarmed = true;
                 game.score = game.score + 100;                
@@ -63,7 +63,13 @@ public class SatelliteObject extends GameObject
                 game.coreCount++;
 
                 if(this.equals(game.satellite1)){
-                    game.shakeController.disable();
+                    game.shakeController.enable();
+                }
+                if(this.equals(game.satellite2)){
+                    game.rotationController.addTarget(game.satellite2);
+                }
+                if(this.equals(game.satellite3)){
+                    game.rotationController.addTarget(game.satellite3);
                 }
             }
             else if(avDistance == closestDistance){
