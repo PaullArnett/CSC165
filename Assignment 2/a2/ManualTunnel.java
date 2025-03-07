@@ -1,4 +1,4 @@
-package a1;
+package a2;
 
 import tage.*;
 import tage.shapes.*;

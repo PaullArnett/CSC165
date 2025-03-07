@@ -2,6 +2,9 @@ package a1;
 
 import tage.*;
 import org.joml.*;
+
+import a2.MyGame;
+
 import static java.lang.Math.min;
 
 public class SatelliteObject extends GameObject  

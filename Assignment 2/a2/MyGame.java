@@ -1,4 +1,4 @@
-package a1;
+package a2;
 
 import tage.*;
 import tage.shapes.*;
@@ -11,12 +11,17 @@ import java.io.*;
 import javax.swing.*;
 import org.joml.*;
 
+import a2.ManualTunnel;
+import a2.MyGame;
+import a2.Player;
+import a2.SatelliteObject;
 import tage.input.*;
 import tage.input.action.*;
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
 import tage.Light.LightType;
 import tage.nodeControllers.*;
+
 
 public class MyGame extends VariableFrameRateGame
 {
@@ -31,7 +36,7 @@ public class MyGame extends VariableFrameRateGame
 	public RotationController rotationController;
 	public ShakeController shakeController;
 
-	public boolean cameraMode, gameOver;
+	public boolean cameraMode, gameOver, thruPortal, linesOn;
 	public int score;
 	public String gameMessage;
 	public float timeScale;
@@ -57,6 +62,8 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void createViewports()
 	{ 
+		//Left vp is main camera
+		//Right vp is minimap in top right
 		(engine.getRenderSystem()).addViewport("LEFT",0,0,1f,1f);
 		(engine.getRenderSystem()).addViewport("RIGHT",.75f,.75f,.25f,.25f);
 
@@ -101,7 +108,7 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void loadTextures()
 	{	doltx = new TextureImage("Dolphin_HighPolyUV.png");
-		tuntx = new TextureImage("tunnel.jpg");
+		tuntx = new TextureImage("tunnel.png");
 		detonation = new TextureImage("detonation.jpg");
 		ground = new TextureImage("ground.jpg");
 
@@ -121,52 +128,53 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void buildObjects()
 	{	
-		groundPlane = new GameObject(GameObject.root(), groundPlaneS, ground);
-		groundPlane.setLocalScale((new Matrix4f()).scaling(1000.0f));
-		groundPlane.setLocalTranslation((new Matrix4f()).translation(0,0,0));
+		Matrix4f initialTranslation, initialScale;
 
-		// Enable texture tiling
+		//ground plane
+		groundPlane = new GameObject(GameObject.root(), groundPlaneS, ground);
+		groundPlane.setLocalScale((new Matrix4f()).scaling(0.0f));
+		groundPlane.setLocalTranslation((new Matrix4f()).translation(0,0,0));
+		// Enable texture tiling so ground is not stretched
 		groundPlane.getRenderStates().setTiling(1); 
 		groundPlane.getRenderStates().setTileFactor(100);
 
-		Matrix4f initialTranslation, initialScale;
 		// build dolphin in the center of the window
 		avatar = new Player(GameObject.root(), dolS, doltx);
 		initialTranslation = (new Matrix4f()).translation(0,1.0f,0);
 		initialScale = (new Matrix4f()).scaling(3.0f);
 		avatar.setLocalTranslation(initialTranslation);
 		avatar.setLocalScale(initialScale);
-		//initialRotation 
 		avatar.setLocalRotation((new Matrix4f()).rotationY((float)java.lang.Math.toRadians(135.0f)));
 		
 		//build all 3 satellites
 		satellite1 = new SatelliteObject(GameObject.root(), sphS, metalIdle);
 		initialTranslation = (new Matrix4f()).translation(24,2.75f,-60);
-		initialScale = (new Matrix4f()).scaling(3f);
+		initialScale = (new Matrix4f()).scaling(0f);
 		satellite1.setLocalTranslation(initialTranslation);
 		satellite1.setLocalScale(initialScale);
 
 		satellite2 = new SatelliteObject(GameObject.root(), torS, metalIdle2);
 		initialTranslation = (new Matrix4f()).translation(40,2.25f,-20);
-		initialScale = (new Matrix4f()).scaling(3.8f);
+		initialScale = (new Matrix4f()).scaling(0f);
 		satellite2.setLocalTranslation(initialTranslation);
 		satellite2.setLocalScale(initialScale);
 		satellite2.setLocalRotation((new Matrix4f()).rotateZ((float)java.lang.Math.toRadians(-45.0f)).rotateX((float)java.lang.Math.toRadians(-45.0f)));
 
 		satellite3 = new SatelliteObject(GameObject.root(), cubS, metalIdle3);
 		initialTranslation = (new Matrix4f()).translation(53,2.25f,-48);
-		initialScale = (new Matrix4f()).scaling(3.3f);
+		initialScale = (new Matrix4f()).scaling(0f);
 		satellite3.setLocalTranslation(initialTranslation);
 		satellite3.setLocalScale(initialScale);
 		
 		// build manual tunnel
 		manualTunnel = new GameObject(GameObject.root(), tunS, tuntx);
-		initialTranslation = (new Matrix4f()).translation(8,1.0f,-8);
+		initialTranslation = (new Matrix4f()).translation(3,1.2f,-3);
 		manualTunnel.setLocalTranslation(initialTranslation);
 		manualTunnel.setLocalRotation((new Matrix4f()).rotateY((float)java.lang.Math.toRadians(-45.0f)).rotateX((float)java.lang.Math.toRadians(90.0f)));
-		manualTunnel.setLocalScale(new Matrix4f().scaling(.1f, .5f, .1f));
+		manualTunnel.setLocalScale(new Matrix4f().scaling(4.0f, 2.0f, 4.0f));
 		manualTunnel.getRenderStates().hasLighting(true);
 
+		//satellite cores 1-3
 		satCore1 = new GameObject(GameObject.root(), cubS, detonation);
 		initialTranslation = (new Matrix4f()).translation(0,1.2f,0);
 		satCore1.setLocalTranslation(initialTranslation);
@@ -176,22 +184,20 @@ public class MyGame extends VariableFrameRateGame
 		satCore1.propagateScale(false);
 
 		satCore2 = new GameObject(GameObject.root(), cubS, detonation);
-		initialTranslation = (new Matrix4f()).translation(0,1.5f,0);
+		initialTranslation = (new Matrix4f()).translation(0,1.6f,0);
 		satCore2.setLocalTranslation(initialTranslation);
 		satCore2.setLocalScale(new Matrix4f().scaling(0,0,0));
 		satCore2.setParent(avatar);
 		satCore2.propagateTranslation(true);
 		satCore2.propagateScale(false);
-
 		
 		satCore3 = new GameObject(GameObject.root(), cubS, detonation);
-		initialTranslation = (new Matrix4f()).translation(0,1.8f,0);
+		initialTranslation = (new Matrix4f()).translation(0,2.0f,0);
 		satCore3.setLocalTranslation(initialTranslation);
 		satCore3.setLocalScale(new Matrix4f().scaling(0,0,0));
 		satCore3.setParent(avatar);
 		satCore3.propagateTranslation(true);
 		satCore3.propagateScale(false);
-
 
 		// add X,Y,Z axes
 		x = new GameObject(GameObject.root(), linxS);
@@ -251,20 +257,25 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void initializeGame()
 	{	
+		//cameras from viewports
 		cam = (engine.getRenderSystem().getViewport("LEFT").getCamera());
 		cam2 = (engine.getRenderSystem().getViewport("RIGHT").getCamera());
 
+		im = engine.getInputManager();
+
 		gameMessage = "";
 		startTime = System.currentTimeMillis();
+		linesOn = true;
 
-  		im = engine.getInputManager();
-		cameraOrbit3D = new MyCameraOrbit3D(cam, avatar,  engine);
-		minimapController = new MinimapController(cam2, engine);
+		//adds all controllers
+		cameraOrbit3D = new MyCameraOrbit3D(cam, avatar,  engine, this);
+		minimapController = new MinimapController(cam2, engine, this);
 		gamepadController = new GamepadController(this);
 		keyboardController = new KeyboardController(this);
 		rotationController = new RotationController(engine, (new Vector3f(0,1,0)), .001f);
 		shakeController = new ShakeController(engine, 0.5f);
 
+		//add nodecontrollers to scene graph
 		(engine.getSceneGraph()).addNodeController(rotationController);
 		(engine.getSceneGraph()).addNodeController(shakeController);
 
@@ -283,7 +294,18 @@ public class MyGame extends VariableFrameRateGame
 		timeScale = (float)(elapsTime * (1000/6));
 		lastFrameTime = currFrameTime;
 
-		//@@@@ADDED TO JAVADOCS@@@@
+		manualTunnel.yaw(.05f, this);
+		
+		//once through the portal all the objects will show
+		if(!thruPortal && manualTunnel.getWorldLocation().distance(avatar.getWorldLocation()) < 2.0f){
+			thruPortal = true;
+			groundPlane.setLocalScale((new Matrix4f()).scaling(1000.0f));
+			satellite1.setLocalScale((new Matrix4f()).scaling(3.0f));
+			satellite2.setLocalScale((new Matrix4f()).scaling(3.8f));
+			satellite3.setLocalScale((new Matrix4f()).scaling(3.3f));
+			manualTunnel.setLocalScale((new Matrix4f()).scaling(0f));
+		}
+
 		// build and set HUD for score and gameMessage
 		float leftVpWidth = leftVp.getActualWidth();
 		float leftVpHeight = leftVp.getActualHeight();
@@ -294,20 +316,19 @@ public class MyGame extends VariableFrameRateGame
 
 		Vector3f hud1Color = new Vector3f(0,0,1);
 		Vector3f hud2Color = new Vector3f(0,1,0);
-		Vector3f hud3Color = new Vector3f(1,0,0);
+		Vector3f hud3Color = new Vector3f(1,0,0); //added in javadocs
 
 		(engine.getHUDmanager()).setHUD1(gameMessage, hud1Color,(int)(leftVpWidth * 0.42), (int)(leftVpHeight * 0.95));
 		(engine.getHUDmanager()).setHUD2(dispScoreStr, hud2Color,(int)(leftVpWidth * 0.05),(int)(leftVpHeight * 0.05));
 		(engine.getHUDmanager()).setHUD3(dispPosStr, hud3Color,(int)(leftVpWidth * 0.76), (int)(leftVpHeight * 0.765));
 
-		//end game if score reaches 300 (all satellites disarmed)
-		if(score >= 300){
-			gameOver();
-		}
-
+		//check how close avatar is to all satellites
 		satellite1.checkDistances(this, metalIdle, metalDisarmable, metalDisarmed);
 		satellite2.checkDistances(this, metalIdle2, metalDisarmable2, metalDisarmed2);
 		satellite3.checkDistances(this, metalIdle3, metalDisarmable3, metalDisarmed3);
+
+		//message until player goes through portal
+		if (!thruPortal){gameMessage = "Go through the Portal!";}
 
 		//updates inputs
 		im.update((float)elapsTime);
@@ -318,9 +339,10 @@ public class MyGame extends VariableFrameRateGame
 		return avatar;
 	}
 
+	//game over messages
 	public void gameOver() {
 		gameOver = true;
-		if(score >= 300){
+		if(coreCount == 3){
 			gameMessage = "Victory: All Satellites Disarmed!";
 		}
 		else {
@@ -337,6 +359,7 @@ public class MyGame extends VariableFrameRateGame
 		
 		//reset camera
 		cameraOrbit3D.resetPosition();
+		cam2.setLocation(new Vector3f(10f,25f,-10f));
 		
 		// Reset score and game state
 		score = 0;
@@ -344,19 +367,31 @@ public class MyGame extends VariableFrameRateGame
 		cameraMode = false;
 		
 		// Reset satellite textures
-		satellite1.resetTexture(metalIdle);
-		satellite2.resetTexture(metalIdle2);
-		satellite3.resetTexture(metalIdle3);
+		satellite1.resetTexture(this, metalIdle);
+		satellite2.resetTexture(this, metalIdle2);
+		satellite3.resetTexture(this, metalIdle3);
 		
 		// Reset game timer
 		startTime = System.currentTimeMillis();
 		lastFrameTime = 0;
 		currFrameTime = 0;
 
+		//reset all objects
 		satCore1.setLocalScale(new Matrix4f().scaling(0,0,0));
 		satCore2.setLocalScale(new Matrix4f().scaling(0,0,0));
 		satCore3.setLocalScale(new Matrix4f().scaling(0,0,0));
-	
+		groundPlane.setLocalScale((new Matrix4f()).scaling(0f));
+		satellite1.setLocalScale((new Matrix4f()).scaling(0f));
+		satellite2.setLocalScale((new Matrix4f()).scaling(0f));
+		satellite3.setLocalScale((new Matrix4f()).scaling(0f));
+		manualTunnel.setLocalScale(new Matrix4f().scaling(4.0f, 2.0f, 4.0f));
+
+		//reset controllers
+		shakeController.removeTarget(satellite1);
+		rotationController.removeTarget(satellite2);
+		rotationController.removeTarget(satellite3);
+
+		thruPortal = false;
 		System.out.println("Game restarted!");
 	}
 

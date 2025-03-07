@@ -3,6 +3,8 @@ package a1;
 import tage.*;
 import org.joml.*;
 
+import a2.MyGame;
+
 public class Player extends GameObject  
 {
     public Player(GameObject parent, ObjShape shape, TextureImage texture) {

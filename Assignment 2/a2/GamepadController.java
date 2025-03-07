@@ -1,10 +1,13 @@
-package a1;
+package a2;
 
 import tage.*;
 import tage.input.InputManager;
 import tage.input.action.AbstractInputAction;
 import net.java.games.input.Event;
 import org.joml.*;
+
+import a2.MyGame;
+import a2.Player;
 import net.java.games.input.Event;
 import net.java.games.input.Component;
 
@@ -32,9 +35,9 @@ public class GamepadController
 		for (net.java.games.input.Component.Identifier.Axis axis : movementAxes) {
 			im.associateActionWithAllGamepads(axis, controllerInput, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		}
-		im.associateActionWithAllGamepads(
-			net.java.games.input.Component.Identifier.Button._1, controllerInput,
-			InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Button._0, controllerInput, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Button._2, controllerInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Button._3, controllerInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
     }     
         
     private class ControllerInput extends AbstractInputAction{
@@ -48,21 +51,28 @@ public class GamepadController
 
             if (!game.gameOver){
                 // Left stick Y-axis for moving forward and backward
-                if (componentName.equals(Component.Identifier.Axis.Y.getName())) {
-                    scalar = -e.getValue() * 0.04f * game.timeScale; 
+                if (componentName.equals(Component.Identifier.Button._0.getName())) {
+                    scalar = 0.05f * game.timeScale; 
                     if(!game.cameraMode) { 
                         av.move(scalar, game);
                     }
                 }
                 // Right stick X-axis for yaw
-                if (componentName.equals(Component.Identifier.Axis.RX.getName())) {
+                else if (componentName.equals(Component.Identifier.Axis.X.getName())) {
                     scalar = -e.getValue() * 0.02f * game.timeScale; 
                     if(!game.cameraMode) { 
-                        av.yaw(scalar, game);
+                        av.globalYaw(scalar, game);
                     }
                 }
-                // Button B for dismount and remount
-                else if (componentName.equals(Component.Identifier.Button._1.getName())) {  
+                // Button X disarm
+                else if (componentName.equals(Component.Identifier.Button._2.getName())) {  
+                    game.satellite1.disarm(game, game.metalDisarmed);
+                    game.satellite2.disarm(game, game.metalDisarmed2);
+                    game.satellite3.disarm(game, game.metalDisarmed3);
+                }
+
+                // Button Y for camerMode
+                else if (componentName.equals(Component.Identifier.Button._3.getName())) {  
                     game.cameraMode = !game.cameraMode;
                     if (game.cameraMode){
                         game.cameraOrbit3D.setupInputs();

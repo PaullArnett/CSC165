@@ -1,9 +1,13 @@
-package a1;
+package a2;
 
 import tage.*;
 
 import org.joml.*;
+
+import a2.MyGame;
+
 import static java.lang.Math.min;
+import tage.networking.client.GameConnectionClient;
 
 public class SatelliteObject extends GameObject  
 {
@@ -27,13 +31,13 @@ public class SatelliteObject extends GameObject
         if (!IsDetonated && !IsDisarmed && avDistance == closestDistance){
 
             //too close, detonate satellite
-            if (avDistance < 5.0f){
+            if (avDistance < 6.0f){
                 this.setTextureImage(game.detonation);
                 IsDetonated = true;
                 game.gameOver();
             }
             //Close enough to disarm
-            else if (avDistance < 9.0f && avDistance >= 5.0f) { 
+            else if (avDistance < 11.0f && avDistance >= 6.0f) { 
                 
                 this.setTextureImage(disarmable);
                 game.gameMessage = "Close Enough, Disarm the satellite!";
@@ -44,26 +48,28 @@ public class SatelliteObject extends GameObject
                 game.gameMessage = "Disarm the Satellites!";
             }  
         }
-        //game message if far away from all satellites
-        if (closestDistance > 22.0f){
-            game.gameMessage = "Go through the Wormhole!";
-        }
     }  
 
     public void disarm(MyGame game, TextureImage disarmed){
             //disarm the satellite
-            if (avDistance < 9.0f && avDistance > 5.0f && !IsDetonated && !IsDisarmed && avDistance == closestDistance){
+            if (avDistance < 11.0f && avDistance > 6.0f && !IsDetonated && !IsDisarmed && avDistance == closestDistance){
                 this.setTextureImage(disarmed);
                 IsDisarmed = true;
                 game.score = game.score + 100;                
                 game.gameMessage = "Satellite Disarmed!";
-                if(game.coreCount == 0){game.satCore1.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
-                if(game.coreCount == 1){game.satCore2.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
-                if(game.coreCount == 2){game.satCore3.setLocalScale(new Matrix4f().scaling(.1f, .1f, .1f));}
+                
+                //show an addition core for each satellite disarmed
+                if(game.coreCount == 0){game.satCore1.setLocalScale(new Matrix4f().scaling(.15f, .15f, .15f));}
+                if(game.coreCount == 1){game.satCore2.setLocalScale(new Matrix4f().scaling(.15f, .15f, .15f));}
+                if(game.coreCount == 2){game.satCore3.setLocalScale(new Matrix4f().scaling(.15f, .15f, .15f));}
                 game.coreCount++;
 
+                if(game.coreCount == 3){
+                    game.gameOver();
+                }
+                //satellite effects once disarmed
                 if(this.equals(game.satellite1)){
-                    game.shakeController.enable();
+                    game.shakeController.addTarget(game.satellite1);
                 }
                 if(this.equals(game.satellite2)){
                     game.rotationController.addTarget(game.satellite2);
@@ -72,16 +78,17 @@ public class SatelliteObject extends GameObject
                     game.rotationController.addTarget(game.satellite3);
                 }
             }
+            //disarming too soon is a point penatly
             else if(avDistance == closestDistance){
                 game.score = game.score - 50; 
                 game.gameMessage = "Not Close Enough! -50 Points";
-                System.out.println(avDistance);
             }
     }
     //used to restart the game
-    public void resetTexture(TextureImage idle){
+    public void resetTexture(MyGame game, TextureImage idle){
         this.setTextureImage(idle);
         IsDisarmed = false;
         IsDetonated = false;
+        game.coreCount = 0;
     }    
 }

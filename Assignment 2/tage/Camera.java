@@ -1,7 +1,7 @@
 package tage;
 import org.joml.*;
 
-import a1.MyGame;
+import a2.MyGame;
 
 /**
 * A Camera specifies the rendering viewpoint for a Viewport.

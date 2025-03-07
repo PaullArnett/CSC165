@@ -1,4 +1,4 @@
-package a1;
+package a2;
 
 import java.lang.Math;
 import tage.*;
@@ -17,23 +17,25 @@ import net.java.games.input.Component;
 public class MyCameraOrbit3D extends CameraOrbit3D
 {
     private Engine engine;
-    private Camera camera; // the camera being controlled
-    private GameObject avatar; // the target avatar the camera looks at
+    private Camera camera; 
+    private GameObject avatar; 
     private float cameraAzimuth; // rotation around target Y axis
     private float cameraElevation; // elevation of camera above target
     private float cameraRadius; // distance between camera and target
+    private MyGame game;
     
-    public MyCameraOrbit3D(Camera cam, GameObject av, Engine e)
+    public MyCameraOrbit3D(Camera cam, GameObject av, Engine e, MyGame g)
     { 
-        // Call the superclass constructor with default azimuth, elevation, and radius values
         super(cam, av, e, -45.0f, 30.0f, 15.0f);
         engine = e;
+        game = g;
         cameraAzimuth = -45.0f;
         cameraElevation = 30.0f; 
         cameraRadius = 15.0f; 
         setupInputs();
     }
 
+    //mapping keys for Orbit camera
     @Override
     public void setupInputs()
     { 
@@ -53,24 +55,23 @@ public class MyCameraOrbit3D extends CameraOrbit3D
 
 
         //controller inputs
-        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, azmAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RY, zoomAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RX, azmAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RY, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, zoomAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
     }
     
+    //this orbits the camera from side to side
     private class OrbitAzimuthAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
-            System.out.println("OrbitAzimuthAction triggered!");  // Debugging print
-
             float rotAmount;
             String btnName = event.getComponent().getIdentifier().getName();
 
             if (btnName.equals("A"))
-                { rotAmount=0.5f; }
-            else if (btnName.equals("D"))
                 { rotAmount=-0.5f; }
+            else if (btnName.equals("D"))
+                { rotAmount=0.5f; }
             else if (event.getValue() < -0.2)
                 { rotAmount=-0.5f; }
             else if (event.getValue() > 0.2)
@@ -78,14 +79,14 @@ public class MyCameraOrbit3D extends CameraOrbit3D
             else
                 { rotAmount=0.0f; }
 
-            cameraAzimuth += rotAmount;
+            cameraAzimuth += rotAmount * game.timeScale;
             cameraAzimuth = cameraAzimuth % 360;
-            System.out.println(cameraAzimuth);  // Debugging print
 
             updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }
 
+    //zooms in and out towards the avatar
     private class ZoomRadiusAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
@@ -103,11 +104,13 @@ public class MyCameraOrbit3D extends CameraOrbit3D
             else
                 { zoomAmount=0.0f; }
 
-            cameraRadius += zoomAmount;
+            cameraRadius += zoomAmount * game.timeScale;
+            cameraRadius = Math.max(3.0f, cameraRadius); //radius of 3 is the minimum
             updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }
 
+    //orbits camera up and down
     private class ElevationAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
@@ -119,15 +122,15 @@ public class MyCameraOrbit3D extends CameraOrbit3D
             else if (btnName.equals("S"))
                 { elvAmount=-0.5f; }
             else if (event.getValue() < -0.2)
-                { elvAmount=-0.5f; }
-            else if (event.getValue() > 0.2)
                 { elvAmount=0.5f; }
+            else if (event.getValue() > 0.2)
+                { elvAmount=-0.5f; }
             else
                 { elvAmount=0.0f; }
 
-            cameraElevation += elvAmount;
+            cameraElevation += elvAmount * game.timeScale;
             cameraElevation = cameraElevation % 360;
-            cameraElevation = Math.max(1.0f, Math.min(89.0f, cameraElevation));
+            cameraElevation = Math.max(1.0f, Math.min(89.0f, cameraElevation)); //range from 1 - 89 
             updateCameraPosition(cameraAzimuth, cameraElevation, cameraRadius);
         } 
     }

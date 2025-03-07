@@ -1,9 +1,11 @@
-package a1;
+package a2;
 
 import tage.*;
 
 
 import org.joml.*;
+
+import a2.MyGame;
 
 public class Player extends GameObject  
 {
@@ -17,7 +19,7 @@ public class Player extends GameObject
     private Vector3f oldPosition, newPosition;
     private Vector4f fwdDirection;
 
-    //moves the player forward or backwords if riding the dolphin
+    //moves the player forward or backwords 
     public void move(float scalar, MyGame game){
             oldPosition = this.getWorldLocation();
             fwdDirection = new Vector4f(0f,0f,1f,1f);

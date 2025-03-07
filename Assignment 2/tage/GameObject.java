@@ -1,7 +1,7 @@
 package tage;
 import org.joml.*;
 
-import a1.MyGame;
+import a2.MyGame;
 
 import java.util.*;
 import tage.shapes.*;

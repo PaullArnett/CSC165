@@ -7,9 +7,10 @@ import tage.input.*;
 import tage.input.action.*;
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
-import a1.MyGame;
 import net.java.games.input.Event;
 import org.joml.*;
+
+import a2.MyGame;
 import net.java.games.input.Event;
 import net.java.games.input.Component;
 

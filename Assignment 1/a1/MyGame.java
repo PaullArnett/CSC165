@@ -10,6 +10,10 @@ import java.io.*;
 import javax.swing.*;
 import org.joml.*;
 
+import a2.ManualTunnel;
+import a2.MyGame;
+import a2.Player;
+import a2.SatelliteObject;
 import tage.input.*;
 import tage.input.action.*;
 import net.java.games.input.*;

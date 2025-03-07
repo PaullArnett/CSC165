@@ -1,10 +1,13 @@
-package a1;
+package a2;
 
 import tage.*;
 import tage.input.InputManager;
 import tage.input.action.AbstractInputAction;
 import net.java.games.input.Event;
 import org.joml.*;
+
+import a2.MyGame;
+import a2.Player;
 import net.java.games.input.Event;
 import net.java.games.input.Component;
 
@@ -23,7 +26,7 @@ public class KeyboardController
         InputManager im = game.engine.getInputManager();
         KeyboardInput keyboardInput = new KeyboardInput();
 
-		//MOVEMENT FOR KEYBOARD
+		//MOVEMENT buttons FOR KEYBOARD
 		net.java.games.input.Component.Identifier.Key[] movementKeys = {
 			net.java.games.input.Component.Identifier.Key.W,
 			net.java.games.input.Component.Identifier.Key.S,
@@ -38,6 +41,7 @@ public class KeyboardController
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.R, keyboardInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.C, keyboardInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.E, keyboardInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key._3, keyboardInput, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
     } 
 
     private class KeyboardInput extends AbstractInputAction{
@@ -82,6 +86,23 @@ public class KeyboardController
                     }
                     else{
                         game.keyboardController.setupInputs();
+                    }
+                }
+
+                //turns lines on/off
+                else if (e.getComponent().getIdentifier().getName().equals("3"))
+                { 
+                    if (game.linesOn){
+                        game.linesOn = false;
+                        game.x.setLocalScale(new Matrix4f().scaling(0,0,0));
+                        game.y.setLocalScale(new Matrix4f().scaling(0,0,0));
+                        game.z.setLocalScale(new Matrix4f().scaling(0,0,0));
+                    }
+                    else{
+                        game.linesOn = true;
+                        game.x.setLocalScale(new Matrix4f().scaling(10.0f, 1.0f, 1.0f));
+                        game.y.setLocalScale(new Matrix4f().scaling(1.0f, 10.0f, 1.0f));
+                        game.z.setLocalScale(new Matrix4f().scaling(1.0f, 1.0f, 10.0f));
                     }
                 }
             }

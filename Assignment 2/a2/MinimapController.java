@@ -1,4 +1,4 @@
-package a1;
+package a2;
 
 import java.lang.Math;
 import tage.*;
@@ -18,20 +18,24 @@ public class MinimapController
     private Engine engine;
     private Camera camera;
     private float x, z, y, panX, panZ;
-    private Vector3f oldLoc;
-    
+    private MyGame game;
 
-    public MinimapController(Camera cam, Engine e){
+    public MinimapController(Camera cam, Engine e, MyGame g){
         engine = e;
         camera = cam;
-        oldLoc = camera.getLocation();
+        game = g;
+
+        //initial postion of minimap camera
+        x = 10.0f;
         y = 25.0f;
+        z = -10.0f;
 
         setupInputs();
         updateCameraPosition();
     }
 
-        public void setupInputs()
+    //mapping more keys
+    public void setupInputs()
     { 
         PanMapAction panMapAction = new PanMapAction();
         ZoomMapAction zoomMapAction = new ZoomMapAction();
@@ -50,13 +54,9 @@ public class MinimapController
     public void updateCameraPosition()
     { 
         camera.setLocation(new Vector3f(x,y,z));
-        System.out.println(x + y + z);
     }
 
-    public void resetPosition(){
-    
-    }
-
+    //pans the camera but adjusting the x and z of camera's location
     private class PanMapAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
@@ -73,19 +73,18 @@ public class MinimapController
             else if (btnName.equals("Down"))
                 { panZ=0.3f; }
 
-            x += panX;
-            z += panZ;
+            x += panX * game.timeScale;
+            z += panZ * game.timeScale;
             updateCameraPosition();
         }
     }
 
-    
+    //zooms the camera but adjusting the y of camera's location
     private class ZoomMapAction extends AbstractInputAction
     { public void performAction(float time, Event event)
         { 
             float zoomAmount;
             String btnName = event.getComponent().getIdentifier().getName();
-            System.out.println(btnName);
 
             if (btnName.equals("Pg Up"))
                 { zoomAmount=-0.25f; }
@@ -94,7 +93,7 @@ public class MinimapController
             else
                 { zoomAmount=0.0f; }
 
-            y += zoomAmount;
+            y += zoomAmount * game.timeScale;
             updateCameraPosition();
         }
     }
